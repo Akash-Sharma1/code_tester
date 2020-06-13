@@ -18,7 +18,9 @@ function activate(context) {
 		var Dir_path = File_Path;
 		for(var i= Dir_path.length-1;i>=0;i--){if(Dir_path[i] == '\\'){Dir_path = Dir_path.substring(0,i+1);break;}}		
 		var Generatorfile_path = Dir_path+'generator.cpp';
-
+		// if (!fs.existsSync(Generatorfile_path)){
+		// 	fs.mkdirSync(Generatorfile_path);
+		// }
 		function readData(err, data) {			
 			var Data = data;
 			Data = Data.split('\r').join('')
@@ -46,7 +48,7 @@ function activate(context) {
 			while(i < Data.length && Data[i] != '{'){i++;}
 			if(Data[i] == '{'){
 				i++;
-				Data = Data.substring(0,i)+"\n\tsrand(time(0));\n\tfreopen (\"testfile.txt\",\"w\",stdout);\n"+Data.substring(i+1,Data.length);
+				Data = Data.substring(0,i)+"\n\tsrand(time(0));\n"+Data.substring(i+1,Data.length);
 			}
 			return Data;
 		}
@@ -134,30 +136,47 @@ function activate(context) {
 			return Data;
 		}
 
-		
 		fs.readFile(File_Path, 'utf8', readData);
+
+		compilegeneratorfile(Generatorfile_path , Dir_path + 'Tests/', "00");
 	}
 	
-	function seperateinop(File_Path) {
-		var Dir_path = File_Path;
-		for(var i= Dir_path.length-1;i>=0;i--){
-			if(Dir_path[i] == '\\'){
-				Dir_path = Dir_path.substring(0,i+1);
-				break;
-			}
+	function compilegeneratorfile(Generatorfile_path , Dir_path, filename){
+		var cnt = 0;
+		var Result = "";
+		var x = setInterval(()=>{
+			cnt++;
+			if(cnt >= 10)clearInterval(x);
+			let resultPromise = cpp.runFile(Generatorfile_path);
+			resultPromise
+				.then(result => {
+					if(result.stderr.length > 0 || result.exitCode > 0 || typeof(result.errorType) != 'undefined'){
+						console.error(result.stderr, result.exitCode , result.errorType);
+						clearInterval(x);
+					}
+					if(result.stdout.length > 0){
+						Result = result.stdout;
+						SeprateResult(Result, Dir_path,filename);
+						clearInterval(x);
+					}
+					console.log(result);
+				})
+				.catch(err => {
+					console.log(err);
+				}
+			);
+		},2000);
+	}
+	function SeprateResult(Data, Dir_path, filename) {
+		if (!fs.existsSync(Dir_path)){
+			fs.mkdirSync(Dir_path);
 		}
-		var inputfile_path = Dir_path+'in.txt';
-		var outputfile_path = Dir_path+'out.txt';
+		var inputfile_path = Dir_path+'in'+filename+'.txt';
+		var outputfile_path = Dir_path+'out'+filename+'.txt';
 		
-		function readData(err, data) {
-			var Data = data;
-			Data = Data.split('\r').join('')
-			var X = seperate(Data);			
-			writegeneratorfile(X);
-
-	  	}
-		fs.readFile(File_Path, 'utf8', readData);
-
+		Data = Data.split('\r').join('')
+		seperate(Data);		
+		
 		function writegeneratorfile(X){
 			var flag = 1;
 			fs.writeFile(inputfile_path, X[0], (err,data)=>{
@@ -182,8 +201,8 @@ function activate(context) {
 				else{
 					input += lines[i].substring(0,x) + "\r\n";
 				}
-			} 
-			return [input , output];
+			} 	
+			writegeneratorfile([input , output]);
 		}
 		
 
