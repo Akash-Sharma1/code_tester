@@ -1,65 +1,69 @@
 # code-tester README
+This is your Competitive Companion, with this extension you can make test cases for your cpp file, run any files on them, see the result of your submission, make test cases for your custom test case generator.
 
-This is the README for your extension "code-tester". After writing up a brief description, we recommend including the following sections.
+Happy rating to you all.
 
-## Features
+## How to make test cases
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+* 1.> Make Test cases
 
-For example if there is an image subfolder under your extension project workspace:
+- Make you solution.cpp file and take input via 'cin' .
+- Specify limits in comments for each variable after cin (in same line).
+- Seprate upper and lower limits via '-'
+- You can give multiple limits of different viariables seprated by spaces(' ').
+- for example "cin>>a;//1-15".
+- for example "cin>>b>>c;//1-15 2-20".
 
-\!\[feature X\]\(images/feature-x.png\)
+\!\[Image\]\(images/images/Screenshot (513).png\)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+* 2.> Specify Time limit and number of test cases to be made
+
+- Make an extra commented line at the end of the code. 
+- Specify Timeout and  number of test cases to be made.
+- Specify each value via '-'.
+- Seprate items via spaces.
+- for example "//timeout-2000 num-5"
+- num represented number of test cases to be formed
+- If you dont specify timeout then by default it set to "2000" milliseconds.
+
+\!\[Image\]\(images/images/Screenshot (515).png\)
+
+* 3.> Running test on a file
+
+- Make an extra commented line at the end of the code. 
+- Specify Timeout and filename(if running tests).
+- Specify each value via '-'.
+- Seprate items via spaces.
+- for example "//timeout-2000 test-in00.txt"
+- test represented filename of the test case
+- If you dont specify test then by default it set to "all".
+- If you dont specify timeout then by default it set to "2000" milliseconds.
+
+\!\[Image\]\(images/images/Screenshot (517).png\)
+
+
+* 4.> Making test case from a different file
+
+- This step is same as of 2.
+
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Cpp compiler is required for the extension to work
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+* Creation of test cases
+* Run test cases
+* Create test cases via custom cpp files
 
-### 1.0.0
+### 0.0.0
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+* Only Cpp is supported
 
 -----------------------------------------------------------------------------------------------------------
 
-## Working with Markdown
+## Meet the developer:
+* [Akash Sharma](http://Akashsharma1.github.io)
 
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+**Happy Rating**

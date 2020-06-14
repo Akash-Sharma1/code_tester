@@ -1,7 +1,7 @@
 {
 	"name": "code-tester",
 	"displayName": "Competitve Companion",
-	"description": "",
+	"description": "This is your Competitive Companion, with this extension you can make test cases for your cpp file, run any files on them and see the result of your submission.",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.46.0"
