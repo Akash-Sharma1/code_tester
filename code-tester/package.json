@@ -10,7 +10,8 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:code-tester.creategenerater"
+		"onCommand:code-tester.creategenerater",
+		"code-tester.runtests"
 	],
 	"main": "./extension.js",
 	"contributes": {
@@ -18,6 +19,10 @@
 			{
 				"command": "code-tester.creategenerater",
 				"title": "Create Tests"
+			},
+			{
+				"command": "code-tester.runtests",
+				"title": "Run Tests"
 			}
 		]
 	},

@@ -2,15 +2,16 @@ const fs = require("fs");
 const vscode = require('vscode');
 const path = require("path");
 const {c, cpp, node, python, java} = require('compile-run');
+const { getJSDocParameterTags } = require("typescript");
 
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
 
-	console.log('Congratulations, your extension "code-tester" is now active!');
-	vscode.window.showInformationMessage('Started!');
+	console.log('Congratulations, your extension "code-tester" is now active!');\
 
+	let disposable2 = vscode.commands.registerCommand('code-tester.runtests', ()=>{ runtests() } );
 	let disposable = vscode.commands.registerCommand('code-tester.creategenerater', ()=>{ makegeneratorfile() } );
 	function makegeneratorfile() {	
 		var File_Path = vscode.window.activeTextEditor.document.fileName;
@@ -18,29 +19,56 @@ function activate(context) {
 		var Dir_path = File_Path;
 		for(var i= Dir_path.length-1;i>=0;i--){if(Dir_path[i] == '\\'){Dir_path = Dir_path.substring(0,i+1);break;}}		
 		var Generatorfile_path = Dir_path+'generator.cpp';
-		// if (!fs.existsSync(Generatorfile_path)){
-		// 	fs.mkdirSync(Generatorfile_path);
-		// }
+
 		function readData(err, data) {			
 			var Data = data;
 			Data = Data.split('\r').join('')
 			Data = add_random_variables(Data);
 			Data = addsrand_to_start(Data);
-			
 			if(Data == "error"){
-				vscode.window.showInformationMessage('Plese follow the specified format give in Readme!');
+				vscode.window.showInformationMessage('Plese follow the format give in Readme!');
 			}
 			else{
 				writegeneratorfile(Data);
 			}
-	  	}
+		  }
 
-		function writegeneratorfile(data){
-			fs.writeFile(Generatorfile_path, data, (err,data)=>{
-				if(err)console.error(err);
-				else 
-				vscode.window.showInformationMessage('Generator file created!');
+		function writegeneratorfile(Data){
+			fs.writeFile(Generatorfile_path, Data, (err,data)=>{
+				if(err){console.error(err);}
+				else{
+					vscode.window.showInformationMessage('making tests');
+					compileandcreatetests(Data);
+				}
 			});
+		}
+
+		function compileandcreatetests(Data){
+			var param = getparameters(Data);
+			var testfilename = "00";
+			var testcnt = param['num'];
+			if(param.timeout > 5000){
+				param.timeout = 5000;
+			}
+			if(testcnt > 10){
+				testcnt = 10;
+			}
+			var cnt = 0; 
+			var vis = {}; 
+			var x = setInterval(() =>{
+				if(testcnt == cnt){clearInterval(x); return;}
+				for(var i=0;i<1000;i++){
+					testfilename = i.toString();
+					if(testfilename.length < 2){testfilename = '0'+testfilename;}
+					if (!fs.existsSync(Dir_path+'Tests/in'+testfilename+'.txt') && vis[testfilename] != 1 ){
+						vis[testfilename] = 1;
+						console.log("doesn't exist"+Dir_path+'Tests/in'+testfilename+'.txt');
+						cnt++;
+						compilegeneratorfile(Generatorfile_path , Dir_path + 'Tests/', testfilename, param.timeout);
+						return;
+					}
+				}
+			}, 4000 );
 		}
 		  
 		function addsrand_to_start(Data){
@@ -54,118 +82,127 @@ function activate(context) {
 		}
 
 		function add_random_variables(Data){
-			var n = Data.length;
-			var linenum = 1;
-			var tabs = 0;
 			var open_brackets = ['(','{','['];
 			var close_brackets = [')','}',']'];
 
-			for(var i=0;i<n;i++){
-				//avoiding comments
-				if(Data[i] == '\n'){linenum++;tabs=0;continue;}
-				else if(Data[i] == '\t'){tabs++;continue;}
-				if(i+1 < n && Data.substring(i,i+2)=="//" ){
-					while(i<n && Data[i] != '\n'){i++;}
-				}	
-				else if(i+1 < n && Data.substring(i,i+2)=="/*"){
-					while(i+1 < n && Data.substring(i,i+2)=="*/"){i++;
-						if(Data[i] == '\t'){tabs++;}if(Data[i] == '\n'){linenum++;tabs=0;}
-					}i++;
-				}
-				else if(i+2 < n && Data.substring(i,i+5) == "cin>>"){
-					var j = i + 3;
-					var variable = [];
-					var temp = "";
-					var brackets = 0;
-					for(var j=i+5;j<n;j++){
-						if(Data[j] == ';'){
-							Data = Data.substring(0,i)+'//'+Data.substring(i,j+1)+Data.substring(j+1,n);
-							variable.push(temp);
-							n = Data.length;
-							i = j + 5;
-							break;
-						}
-						else if(Data[j] == '>' && brackets == 0){
+			var lines = Data.split('\n');
+			var multilinecomment = 0;
+			Data = "";
 
-							variable.push(temp);
-							temp = "";
-							j++;
+			for(var l=0;l<lines.length;l++){
+				var data = lines[l];
+				var n = data.length;
+				var tabs = "" , spaces = "";
+				for(var i=0;i<n;i++){
+					if(multilinecomment > 0 )continue;
+					else if(data[i] == ' '){spaces += " ";}
+					else if(data[i] == '\t'){tabs+="\t";}
+					else if(i+2 < n && data.substring(i,i+2) == "//"){ break; }
+					else if(i+2 < n && data.substring(i,i+2) == "/*"){ multilinecomment++; }
+					else if(i+2 < n && data.substring(i,i+2) == '*/'){	multilinecomment--; }
+					else if(i+5 < n && data.substring(i,i+5) == "cin>>" && multilinecomment == 0){
+						var variable = [];
+						var Interval = [];
+						var temp_string = "";
+						var brackets = 0;
+						for(var j=i+5;j<n;j++){
+							if(data[j] == ';'){
+								data = data.substring(0,i)+'//'+data.substring(i,n);
+								variable.push(temp_string);
+								i = j + 1 + 2;// '//'(extra)
+								n = data.length;
+								break;
+							}
+							else if(j+2<n && data.substring(j,j+2) == '>>' && brackets == 0){
+								variable.push(temp_string);
+								temp_string = "";j++;
+							}
+							else{
+								for(var k=0;k<open_brackets.length;k++){if(data[j] == open_brackets[k]){brackets++;}}
+								for(var k=0;k<close_brackets.length;k++){if(data[j] == close_brackets[k]){brackets--;}}
+								temp_string += data[j];
+							}
 						}
-						else{
-							for(var k=0;k<open_brackets.length;k++){if(Data[j] == open_brackets[k]){brackets++;}}
-							for(var k=0;k<close_brackets.length;k++){if(Data[j] == close_brackets[k]){brackets--;}}
-							temp += Data[j];
+						if(i + 2 >= n || data.substring(i,i+2) != "//" ){
+							console.error("Interval are not specified via comments on linenum:"+(l+1));
+							return "error";
+						}else{i+=2;}// '//'(extra)
+
+						temp_string = data.substring(i,n);
+						var temp_array = temp_string.split(' ');
+
+						for(var j=0;j<temp_array.length;j++){
+							if(temp_array[j].length <= 1)continue;
+							Interval.push( temp_array[j].split('-') );
+							if(Interval[j].length != 2){
+								console.error("Interval of variable are not properly specified on linenum:"+(l+1));
+								return "error";
+							}
 						}
-					}
-					var interval_string = "";
-					var last = n;
-					for(var j=i;j<n;j++){
-						if(Data[j] == '\n'){last=j;break;}
-						interval_string += Data[j];
-					}
-					var interval_arr = interval_string.split(' ');
-					var Interval = [];
-					for(var j=0;j<interval_arr.length;j++){
-						if(interval_arr[j].length <= 1)continue;
-						Interval.push( interval_arr[j].split('-') );
-						if(Interval[j].length != 2){
-							console.error("Interval of variable are not properly specified on linenum:"+linenum);
+						if(Interval.length != variable.length){
+							console.error("Interval count doesn't match input variable count on linenum:"+(l+1));
 							return "error";
 						}
+						var final_string = "";
+						for(var j=0;j<variable.length;j++){
+							final_string += tabs + spaces + variable[j] + ' = rand()%' + Interval[j][1] + '+' + Interval[j][0]+';';
+							final_string += " cout<<"+variable[j]+"<<\" \";\n";
+						}
+						final_string += tabs + spaces + "cout<<\" --input \"<<endl;\n";
+						data = data + '\n' + final_string;
+						break;
 					}
-					if(Interval.length != variable.length){
-						console.error("Interval count doesn't match input variable count on linenum:"+linenum);
-						return "error";
-					}
-					var final_string = "";
-					var tabspace="";
-					if(tabs<1)tabs=1;
-					for(var t=0;t<tabs;t++){tabspace+='\t';}
-					for(var j=0;j<variable.length;j++){
-						final_string += tabspace + variable[j] + ' = rand()%' + Interval[j][1] + '+' + Interval[j][0]+';';
-						final_string += " cout<<"+variable[j]+"<<\" \";\n";   
-						linenum++;
-					}
-					final_string += tabspace + "cout<<\" --input \"<<endl;\n\n";
-					linenum++;
-					tabs = 0;
-					Data = Data.substring(0,i-2)+'\n'+ final_string + Data.substring(last+1,n);
-					n = Data.length;
 				}
+				Data += data  + '\n';
 			}
 			return Data;
 		}
 
 		fs.readFile(File_Path, 'utf8', readData);
-
-		compilegeneratorfile(Generatorfile_path , Dir_path + 'Tests/', "00");
 	}
-	
-	function compilegeneratorfile(Generatorfile_path , Dir_path, filename){
-		var cnt = 0;
+
+	function getparameters(Data){
+		var lines = Data.split('\n');
+		var values = {"timeout":0 , "num":0};
+		if(lines.length == 0){return values;}
+		var data = "";
+		for(var i=lines.length-1;i>=0;i--){
+			if(lines[i].length > 5){
+				data = lines[i];
+				break;
+			}
+		}
+		if(data.length < 7)return values;
+		if(data.substr(0,2) != '//'){return values;}
+		var temp = data.substring( 2, data.length);
+		var vars = temp.split(' ');
+		for(var i=0;i<vars.length;i++){
+			var param = vars[i].split('-');
+			values[param[0]] = param[1];
+		}
+		return values;
+	}
+	var vis = {}
+	function compilegeneratorfile(Generatorfile_path , Dir_path, filename, timeout){
+		if(vis[filename] == 1)return;
+		vis[filename] = 1;
 		var Result = "";
-		var x = setInterval(()=>{
-			cnt++;
-			if(cnt >= 10)clearInterval(x);
-			let resultPromise = cpp.runFile(Generatorfile_path);
-			resultPromise
-				.then(result => {
-					if(result.stderr.length > 0 || result.exitCode > 0 || typeof(result.errorType) != 'undefined'){
-						console.error(result.stderr, result.exitCode , result.errorType);
-						clearInterval(x);
-					}
-					if(result.stdout.length > 0){
-						Result = result.stdout;
-						SeprateResult(Result, Dir_path,filename);
-						clearInterval(x);
-					}
-					console.log(result);
-				})
-				.catch(err => {
-					console.log(err);
+		let resultPromise = cpp.runFile(Generatorfile_path, {timeout: timeout});
+		resultPromise
+			.then(result => {
+				if(result.stderr.length > 0 || result.exitCode > 0 || typeof(result.errorType) != 'undefined'){
+					console.error("Error Description:\n " + result.stderr, result.exitCode , result.errorType);
 				}
-			);
-		},2000);
+				if(result.stdout.length > 0){
+					Result = result.stdout;
+					SeprateResult(Result, Dir_path,filename);
+				}
+				console.log(result);
+			})
+			.catch(err => {
+				console.log(err);
+			}
+		);
 	}
 	function SeprateResult(Data, Dir_path, filename) {
 		if (!fs.existsSync(Dir_path)){
@@ -185,7 +222,7 @@ function activate(context) {
 			fs.writeFile(outputfile_path, X[1], (err,data)=>{
 				if(err){console.error(err);flag = 0;}
 			});
-			if(flag) vscode.window.showInformationMessage('Input/Output file created!');
+			if(flag) vscode.window.showInformationMessage('test: '+filename+' done!');
 		}
 		  
 		function seperate(Data){
@@ -205,6 +242,10 @@ function activate(context) {
 			writegeneratorfile([input , output]);
 		}
 		
+
+	}
+
+	function runtests(){
 
 	}
 
