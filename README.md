@@ -15,7 +15,7 @@ Happy rating to you all.
 - for example "cin>>b>>c;//1-15 2-20".
 
 <p align="center">
-  <img src="https://github.com/Akash-Sharma1/akash-sharma1.github.io/Screenshot (513).png">
+  <img src="https://github.com/Akash-Sharma1/akash-sharma1.github.io/images/Screenshot (513).png">
 </p>
 
 * 2.> Specify Time limit and number of test cases to be made
@@ -29,7 +29,7 @@ Happy rating to you all.
 - If you dont specify timeout then by default it set to "2000" milliseconds.
 
 <p align="center">
-  <img src="https://github.com/Akash-Sharma1/akash-sharma1.github.io/Screenshot (515).png">
+  <img src="https://github.com/Akash-Sharma1/akash-sharma1.github.io/images/Screenshot (515).png">
 </p>
 
 * 3.> Running test on a file
@@ -44,7 +44,7 @@ Happy rating to you all.
 - If you dont specify timeout then by default it set to "2000" milliseconds.
 
 <p align="center">
-  <img src="https://github.com/Akash-Sharma1/akash-sharma1.github.io/Screenshot (517).png">
+  <img src="https://github.com/Akash-Sharma1/akash-sharma1.github.io/images/Screenshot (517).png">
 </p>
 
 * 4.> Making test case from a different file
