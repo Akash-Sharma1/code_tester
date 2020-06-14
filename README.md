@@ -14,7 +14,7 @@ Happy rating to you all.
 - for example "cin>>a;//1-15".
 - for example "cin>>b>>c;//1-15 2-20".
 
-\!\[Image\]\(images/images/Screenshot (513).png\)
+![Defining limits](images\Screenshot (513).png?raw=true "Defining limits")
 
 * 2.> Specify Time limit and number of test cases to be made
 
@@ -26,7 +26,7 @@ Happy rating to you all.
 - num represented number of test cases to be formed
 - If you dont specify timeout then by default it set to "2000" milliseconds.
 
-\!\[Image\]\(images/images/Screenshot (515).png\)
+![Defining Timeouts](images\Screenshot (515).png?raw=true "Defining Timeouts")
 
 * 3.> Running test on a file
 
@@ -39,7 +39,7 @@ Happy rating to you all.
 - If you dont specify test then by default it set to "all".
 - If you dont specify timeout then by default it set to "2000" milliseconds.
 
-\!\[Image\]\(images/images/Screenshot (517).png\)
+![Defining Testfiles](images\Screenshot (517).png?raw=true "Defining Testfiles")
 
 
 * 4.> Making test case from a different file
@@ -66,6 +66,6 @@ Cpp compiler is required for the extension to work
 * <a href="https://iconscout.com/icons/code" target="_blank">Code Icon</a> by <a href="https://iconscout.com/contributors/google-inc" target="_blank">Google Inc.</a>
 
 ## Meet the developer:
-* [Akash Sharma](http://Akashsharma1.github.io)
+* [Akash Sharma](https://github.com/Akash-Sharma1/akash-sharma1.github.io)
 
 **Happy Rating**
