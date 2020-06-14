@@ -2,7 +2,7 @@
 	"name": "code-tester",
 	"displayName": "Competitve Companion",
 	"description": "This is your Competitive Companion, with this extension you can make test cases for your cpp file, run any files on them and see the result of your submission.",
-	"version": "0.0.3",
+	"version": "0.0.5",
 	"icon": "images/code.png",
 	"publisher": "Akashsharma01",
 	"repository": { "type": "git", "url": "https://github.com/Akash-Sharma1/code_tester.git" },
@@ -17,7 +17,7 @@
 		"onCommand:code-tester.runtests",
 		"onCommand:code-tester.customgentest"
 	],
-	"main": "./extension.js",
+	"main": "extension.js",
 	"contributes": {
 		"commands": [
 			{

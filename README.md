@@ -7,9 +7,9 @@ Happy rating to you all.
 
 * 1.> Make Test cases
 
-- Make you solution.cpp file and take input via 'cin' .
+- Make your solution.cpp file and take input via 'cin' .
 - Specify limits in comments for each variable after cin (in same line).
-- Seprate upper and lower limits via '-'
+- Seperate upper and lower limits via '-'
 - You can give multiple limits of different viariables seprated by spaces(' ').
 - for example "cin>>a;//1-15".
 - for example "cin>>b>>c;//1-15 2-20".
@@ -23,7 +23,7 @@ Happy rating to you all.
 - Make an extra commented line at the end of the code. 
 - Specify Timeout and  number of test cases to be made.
 - Specify each value via '-'.
-- Seprate items via spaces.
+- Seperate items via spaces.
 - for example "//timeout-2000 num-5"
 - num represented number of test cases to be formed
 - If you dont specify timeout then by default it set to "2000" milliseconds.
@@ -37,7 +37,7 @@ Happy rating to you all.
 - Make an extra commented line at the end of the code. 
 - Specify Timeout and filename(if running tests).
 - Specify each value via '-'.
-- Seprate items via spaces.
+- Seperate items via spaces.
 - for example "//timeout-2000 test-in00.txt"
 - test represented filename of the test case
 - If you dont specify test then by default it set to "all".
