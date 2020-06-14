@@ -146,7 +146,7 @@ function activate(context) {
 						}
 						var final_string = "";
 						for(var j=0;j<variable.length;j++){
-							final_string += tabs + spaces + variable[j] + ' = rand()%' + Interval[j][1] + '+' + Interval[j][0]+';';
+							final_string += tabs + spaces + variable[j] + ' = rand()%('+Interval[j][1]+'-'+Interval[j][0]+'+1)+'+Interval[j][0]+'; ';
 							final_string += " cout<<"+variable[j]+"<<\" \";\n";
 						}
 						final_string += tabs + spaces + "cout<<\" --input \"<<endl;\n";
