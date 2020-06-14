@@ -4,6 +4,7 @@
 	"description": "This is your Competitive Companion, with this extension you can make test cases for your cpp file, run any files on them and see the result of your submission.",
 	"version": "0.0.1",
 	"icon": "images/code.png",
+	"publisher": "Akashsharma01",
 	"repository": { "type": "git", "url": "https://github.com/Akash-Sharma1/code_tester.git" },
 	"engines": {
 		"vscode": "^1.46.0"
