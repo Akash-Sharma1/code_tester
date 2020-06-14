@@ -9,7 +9,7 @@ const { getJSDocParameterTags } = require("typescript");
  */
 function activate(context) {
 
-	console.log('Congratulations, your extension "code-tester" is now active!');\
+	console.log('Congratulations, your extension "code-tester" is now active!');
 
 	let disposable2 = vscode.commands.registerCommand('code-tester.runtests', ()=>{ runtests() } );
 	let disposable = vscode.commands.registerCommand('code-tester.creategenerater', ()=>{ makegeneratorfile() } );
@@ -191,7 +191,13 @@ function activate(context) {
 		resultPromise
 			.then(result => {
 				if(result.stderr.length > 0 || result.exitCode > 0 || typeof(result.errorType) != 'undefined'){
-					console.error("Error Description:\n " + result.stderr, result.exitCode , result.errorType);
+					console.log("Error Description:");
+					console.log("std error: " + result.stderr);
+					console.log("exit Code: " + result.exitCode);
+					console.log("error Type: " + result.errorType);
+					if(result.errorType == "run-time"){
+						vscode.window.showInformationMessage('Time limit exceeded on given constrainsts');
+					}
 				}
 				if(result.stdout.length > 0){
 					Result = result.stdout;
@@ -245,9 +251,7 @@ function activate(context) {
 
 	}
 
-	function runtests(){
-
-	}
+	function runtests()
 
 
 	context.subscriptions.push(disposable);
