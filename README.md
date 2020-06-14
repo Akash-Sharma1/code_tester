@@ -75,6 +75,6 @@ Cpp compiler is required for the extension to work
 * <a href="https://iconscout.com/icons/code" target="_blank">Code Icon</a> by <a href="https://iconscout.com/contributors/google-inc" target="_blank">Google Inc.</a>
 
 ## Meet the developer:
-* [Akash Sharma](https://github.com/Akash-Sharma1/akash-sharma1.github.io)
+* [Akash Sharma](https://https://akash-sharma1.github.io/)
 
 **Happy Rating**

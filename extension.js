@@ -101,27 +101,30 @@ function activate(context) {
 					else if(i+2 < n && data.substring(i,i+2) == "//"){ break; }
 					else if(i+2 < n && data.substring(i,i+2) == "/*"){ multilinecomment++; }
 					else if(i+2 < n && data.substring(i,i+2) == '*/'){	multilinecomment--; }
-					else if(i+5 < n && data.substring(i,i+5) == "cin>>" && multilinecomment == 0){
+					else if(i+4 < n && (data.substring(i,i+4) == "cin>" || data.substring(i,i+4) == "cin ") && multilinecomment == 0){
 						var variable = [];
 						var Interval = [];
 						var temp_string = "";
 						var brackets = 0;
-						for(var j=i+5;j<n;j++){
+						for(var j=i+3;j<n;j++){
 							if(data[j] == ';'){
 								data = data.substring(0,i)+'//'+data.substring(i,n);
-								variable.push(temp_string);
+								if(temp_string != ""){
+								variable.push(temp_string);}
 								i = j + 1 + 2;// '//'(extra)
 								n = data.length;
 								break;
 							}
 							else if(j+2<n && data.substring(j,j+2) == '>>' && brackets == 0){
-								variable.push(temp_string);
+								if(temp_string != ""){
+								variable.push(temp_string);}
 								temp_string = "";j++;
 							}
 							else{
 								for(var k=0;k<open_brackets.length;k++){if(data[j] == open_brackets[k]){brackets++;}}
 								for(var k=0;k<close_brackets.length;k++){if(data[j] == close_brackets[k]){brackets--;}}
-								temp_string += data[j];
+								if(data[j] != ' ')
+									temp_string += data[j];
 							}
 						}
 						if(i + 2 >= n || data.substring(i,i+2) != "//" ){
