@@ -11,7 +11,8 @@
 	],
 	"activationEvents": [
 		"onCommand:code-tester.creategenerater",
-		"code-tester.runtests"
+		"onCommand:code-tester.runtests",
+		"onCommand:code-tester.customgentest"
 	],
 	"main": "./extension.js",
 	"contributes": {
@@ -23,6 +24,10 @@
 			{
 				"command": "code-tester.runtests",
 				"title": "Run Tests"
+			},
+			{
+				"command": "code-tester.customgentest",
+				"title": "Create Custom Tests"
 			}
 		]
 	},

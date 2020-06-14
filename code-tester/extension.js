@@ -2,7 +2,6 @@ const fs = require("fs");
 const vscode = require('vscode');
 const path = require("path");
 const {c, cpp, node, python, java} = require('compile-run');
-const { getJSDocParameterTags } = require("typescript");
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -11,8 +10,10 @@ function activate(context) {
 
 	console.log('Congratulations, your extension "code-tester" is now active!');
 
-	let disposable2 = vscode.commands.registerCommand('code-tester.runtests', ()=>{ runtests() } );
-	let disposable = vscode.commands.registerCommand('code-tester.creategenerater', ()=>{ makegeneratorfile() } );
+	let disposable = vscode.commands.registerCommand('code-tester.creategenerater', ()=>{ makegeneratorfile(); } );
+	let disposable2 = vscode.commands.registerCommand('code-tester.runtests', ()=>{ runTest(); } );
+	let disposable3 = vscode.commands.registerCommand('code-tester.customgentest', ()=>{ customgentest(); } );
+
 	function makegeneratorfile() {	
 		var File_Path = vscode.window.activeTextEditor.document.fileName;
 		var File_Name = path.basename(File_Path);
@@ -26,12 +27,12 @@ function activate(context) {
 			Data = add_random_variables(Data);
 			Data = addsrand_to_start(Data);
 			if(Data == "error"){
-				vscode.window.showInformationMessage('Plese follow the format give in Readme!');
+				vscode.window.showErrorMessage('Plese follow the format give in Readme!');
 			}
 			else{
 				writegeneratorfile(Data);
 			}
-		  }
+		}
 
 		function writegeneratorfile(Data){
 			fs.writeFile(Generatorfile_path, Data, (err,data)=>{
@@ -46,9 +47,9 @@ function activate(context) {
 		function compileandcreatetests(Data){
 			var param = getparameters(Data);
 			var testfilename = "00";
-			var testcnt = param['num'];
-			if(param.timeout > 5000){
-				param.timeout = 5000;
+			var testcnt = parseInt(param['num']);
+			if(parseInt(param.timeout) > 3000){
+				param.timeout = "3000";
 			}
 			if(testcnt > 10){
 				testcnt = 10;
@@ -68,7 +69,7 @@ function activate(context) {
 						return;
 					}
 				}
-			}, 4000 );
+			}, 3000 );
 		}
 		  
 		function addsrand_to_start(Data){
@@ -124,7 +125,7 @@ function activate(context) {
 							}
 						}
 						if(i + 2 >= n || data.substring(i,i+2) != "//" ){
-							console.error("Interval are not specified via comments on linenum:"+(l+1));
+							vscode.window.showErrorMessage("Interval are not specified via comments on linenum:"+(l+1));
 							return "error";
 						}else{i+=2;}// '//'(extra)
 
@@ -135,12 +136,12 @@ function activate(context) {
 							if(temp_array[j].length <= 1)continue;
 							Interval.push( temp_array[j].split('-') );
 							if(Interval[j].length != 2){
-								console.error("Interval of variable are not properly specified on linenum:"+(l+1));
+								vscode.window.showErrorMessage("Interval of variable are not properly specified on linenum:"+(l+1));
 								return "error";
 							}
 						}
 						if(Interval.length != variable.length){
-							console.error("Interval count doesn't match input variable count on linenum:"+(l+1));
+							vscode.window.showErrorMessage("Interval count doesn't match input variable count on linenum:"+(l+1));
 							return "error";
 						}
 						var final_string = "";
@@ -161,9 +162,175 @@ function activate(context) {
 		fs.readFile(File_Path, 'utf8', readData);
 	}
 
+	function runTest(){
+		var File_Path = vscode.window.activeTextEditor.document.fileName;
+		var File_Name = path.basename(File_Path);
+		var Dir_path = File_Path;
+		for(var i= Dir_path.length-1;i>=0;i--){if(Dir_path[i] == '\\'){Dir_path = Dir_path.substring(0,i+1);break;}}		
+		var test_path = Dir_path+'/Tests/';
+		var files_arr = [];
+		var mappedfiles = [];
+		var nooffiles = 0;
+		var timeout;
+		var testid;
+		
+		fs.readFile(File_Path, 'utf8', readcode);
+		
+		function readcode(err, data) {
+			data = data.split('\r').join('')
+			var X = getparameters(data);
+			timeout = X.timeout;
+			testid = X.test;
+			readDirectory();
+		}
+
+		function readDirectory(){
+			fs.readdir(test_path, function (err, files) {
+				if (err) {
+					vscode.window.showErrorMessage("no tests avaiable");
+					return;
+				} 
+				files.forEach(function (file) {
+					files_arr.push(file);
+					mappedfiles[file] = 1;
+					nooffiles++;
+				});
+				testfiles();
+			});
+		}
+			
+		function testfiles(){
+			var f = 0;
+			if(typeof(testid) !="undefined" && testid != "all"){
+				if(mappedfiles[testid] != 1 || mappedfiles["out"+testid.substring(2,testid.length)] != 1 ){
+					vscode.window.showErrorMessage("Specified Test doen't exist");
+					return;
+				}
+				else{
+					var file_id = testid.substring(2,testid.length);
+					function readinput(err, data) {
+						data = data.split('\r').join('')
+						compilefileon(File_Path , data, file_id);
+					}
+					fs.readFile(test_path+testid, 'utf8', readinput);
+				}
+			}
+			else{
+				var X = setInterval(()=>{
+					var file = testid;
+					if(f == nooffiles/2){clearInterval(X);return;}
+					file = files_arr[f];
+					f++;
+					while(f < nooffiles/2 && (
+						(file.length < 6 || file.substr(0,2) != "in") ||
+						( mappedfiles["out"+file.substring(2,file.length)] != 1 ))
+					){f++;continue;}		
+
+					var file_id = file.substring(2,file.length);
+
+					function readinput(err, data) {
+						data = data.split('\r').join('')
+						compilefileon(File_Path , data, file_id);
+					}
+
+					fs.readFile(test_path+file, 'utf8', readinput);
+
+				}, parseInt(timeout));
+			}
+		}
+		
+		function writeoutputfile(file_id, data){
+			var result_path = Dir_path + '/Results/';
+			if (!fs.existsSync(result_path)){
+				fs.mkdirSync(result_path);
+			}
+			var outputfile_path = result_path+'ans'+file_id;
+			writefile(data);
+			function writefile(data){
+				fs.writeFile(outputfile_path, data , (err,Data)=>{
+					if(err){console.error(err);}
+					else{
+						match_solutions(file_id , data);
+					}
+				});
+			}
+		}
+		function match_solutions(file_id, answer){
+			function readreal(err, data) {
+				data = data.split('\r').join('')
+				answer = answer.split('\r').join('')
+
+				var output = data;
+				var out = [];
+				var ans = [];
+				var temp = output.split('\n');
+				for(var t = 0;t<temp.length;t++){
+					var string  = temp[t];
+					var S = string.split(' ');
+					for(var j=0;j<S.length;j++){
+						if(S[j] != ''){
+							out.push(S[j]);
+						}
+					}
+				}
+				temp = answer.split('\n');
+				for(var t = 0;t<temp.length;t++){
+					var string  = temp[t];
+					var S = string.split(' ');
+					for(var j=0;j<S.length;j++){
+						if(S[j] != ''){
+							ans.push(S[j]);
+						}
+					}
+				}
+				out.sort();
+				ans.sort();
+
+				if(out.length != ans.length){
+					vscode.window.showErrorMessage("WA:"+file_id);
+					return;	
+				}
+				else{
+					for(var i=0;i<out.length;i++){
+						if(out[i] != ans[i]){
+							vscode.window.showErrorMessage("WA:"+file_id);
+							return;
+						}
+					}
+				}
+				vscode.window.showInformationMessage("OK TESTED: "+file_id);
+
+			}
+			fs.readFile( test_path + "out"+ file_id , 'utf8', readreal);
+		}
+
+		function compilefileon(path, input, file_id){
+			var Result = "";
+			let resultPromise = cpp.runFile(path, {timeout: timeout , stdin : input});
+			resultPromise
+				.then(result => {
+					if(result.stderr.length > 0 || result.exitCode > 0 || typeof(result.errorType) != 'undefined'){
+						console.log("Error Description:");
+						console.log("std error: " + result.stderr);
+						console.log("exit Code: " + result.exitCode);
+						console.log("error Type: " + result.errorType);
+						if(result.errorType == "run-time"){
+							vscode.window.showErrorMessage("TLE: "+file_id);
+						}
+						vscode.window.showErrorMessage("Error: while creating test"+file_id);
+					}
+					vscode.window.showInformationMessage("writing solutions: "+file_id);
+					writeoutputfile(file_id , result.stdout);
+				}).catch(err => {
+					console.log(err);
+				}
+			);
+		}
+	}
+	
 	function getparameters(Data){
 		var lines = Data.split('\n');
-		var values = {"timeout":0 , "num":0};
+		var values = {"timeout":"2000" , "num":"0", "test": "all"};
 		if(lines.length == 0){return values;}
 		var data = "";
 		for(var i=lines.length-1;i>=0;i--){
@@ -182,10 +349,47 @@ function activate(context) {
 		}
 		return values;
 	}
-	var vis = {}
+
+	function customgentest(){
+		var File_Path = vscode.window.activeTextEditor.document.fileName;
+		var Dir_path = File_Path;
+		for(var i= Dir_path.length-1;i>=0;i--){if(Dir_path[i] == '\\'){Dir_path = Dir_path.substring(0,i+1);break;}}		
+		var test_path = Dir_path+'/Tests/';
+
+		fs.readFile(File_Path, 'utf8', readcode);
+		
+		function readcode(err, data) {
+			data = data.split('\r').join('')
+			var X = getparameters(data);
+			var param = getparameters(data);
+			var testfilename = "00";
+			var testcnt = parseInt(param['num']);
+			if(parseInt(param.timeout) > 3000){
+				param.timeout = "3000";
+			}
+			if(testcnt > 10){
+				testcnt = 10;
+			}
+			var cnt = 0; 
+			var vis = {}; 
+			vscode.window.showInformationMessage('making tests');
+			var x = setInterval(() =>{
+				if(testcnt == cnt){clearInterval(x); return;}
+				for(var i=0;i<1000;i++){
+					testfilename = i.toString();
+					if(testfilename.length < 2){testfilename = '0'+testfilename;}
+					if (!fs.existsSync(Dir_path+'Tests/in'+testfilename+'.txt') && vis[testfilename] != 1 ){
+						vis[testfilename] = 1;
+						console.log("doesn't exist"+Dir_path+'Tests/in'+testfilename+'.txt');
+						cnt++;
+						compilegeneratorfile(File_Path , Dir_path + 'Tests/', testfilename, param.timeout);
+						return;
+					}
+				}
+			}, 3000 );
+		}
+	}
 	function compilegeneratorfile(Generatorfile_path , Dir_path, filename, timeout){
-		if(vis[filename] == 1)return;
-		vis[filename] = 1;
 		var Result = "";
 		let resultPromise = cpp.runFile(Generatorfile_path, {timeout: timeout});
 		resultPromise
@@ -196,8 +400,9 @@ function activate(context) {
 					console.log("exit Code: " + result.exitCode);
 					console.log("error Type: " + result.errorType);
 					if(result.errorType == "run-time"){
-						vscode.window.showInformationMessage('Time limit exceeded on given constrainsts');
+						vscode.window.showErrorMessage("TLE: "+filename);
 					}
+					vscode.window.showErrorMessage("Error: while creating test"+filename);
 				}
 				if(result.stdout.length > 0){
 					Result = result.stdout;
@@ -251,10 +456,8 @@ function activate(context) {
 
 	}
 
-	function runtests()
-
-
 	context.subscriptions.push(disposable);
+	context.subscriptions.push(disposable2);
 }
 exports.activate = activate;
 
