@@ -14,7 +14,9 @@ Happy rating to you all.
 - for example "cin>>a;//1-15".
 - for example "cin>>b>>c;//1-15 2-20".
 
-![Defining limits](images\Screenshot (513).png?raw=true "Defining limits")
+    <p align="center">
+    <img src="images\Screenshot (513).png" width="350" title="Defining limits">
+    </p>
 
 * 2.> Specify Time limit and number of test cases to be made
 
@@ -26,7 +28,10 @@ Happy rating to you all.
 - num represented number of test cases to be formed
 - If you dont specify timeout then by default it set to "2000" milliseconds.
 
-![Defining Timeouts](images\Screenshot (515).png?raw=true "Defining Timeouts")
+    <p align="center">
+    <img src="images\Screenshot (515).png" width="350" title="Defining limits">
+    </p>
+
 
 * 3.> Running test on a file
 
@@ -39,7 +44,10 @@ Happy rating to you all.
 - If you dont specify test then by default it set to "all".
 - If you dont specify timeout then by default it set to "2000" milliseconds.
 
-![Defining Testfiles](images\Screenshot (517).png?raw=true "Defining Testfiles")
+    <p align="center">
+    <img src="images\Screenshot (517).png" width="350" title="Defining limits">
+    </p>
+
 
 
 * 4.> Making test case from a different file
