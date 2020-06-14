@@ -17,7 +17,7 @@
 		"onCommand:code-tester.runtests",
 		"onCommand:code-tester.customgentest"
 	],
-	"main": "extension.js",
+	"main": "./extension.js",
 	"contributes": {
 		"commands": [
 			{
